@@ -53,6 +53,9 @@ def migrate(migrator, database, fake=False, **kwargs):
         content = pw.TextField()
         date = pw.DateTimeField()
         title = pw.TextField()
+        slug = pw.TextField()
+        published = pw.BooleanField()
+        image = pw.TextField()
 
         class Meta:
             table_name = "blog"

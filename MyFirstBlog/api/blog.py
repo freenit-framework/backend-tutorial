@@ -35,3 +35,38 @@ class BlogListAPI(MethodView):
         query = Blog.select().order_by(Blog.author)
         return paginate(query, pagination)
 
+@blueprint.route('/<slug>', endpoint='blog')
+class BlogApi(MethodView):
+    @blueprint.response(BlogSchema)
+    def get(self, slug):
+        """ Get blog details """
+        try:
+            blog = Blog.get(slug = slug)
+        except Blog.DoesNotExist:
+            abort(404, message='Blog not found')
+        return blog
+
+    @jwt_required
+    @blueprint.response(BlogSchema)
+    def delete(self, slug):
+        """ Delete blog post """
+        try:
+            blog = Blog.get(slug = slug)
+        except Blog.DoesNotExist:
+            abort(404, message='Blog not found')
+        blog.delete_instance()
+        return blog
+
+    @jwt_required
+    @blueprint.arguments(BlogSchema(partial=True))
+    @blueprint.response(BlogSchema)
+    def patch(self, args, slug):
+        """Edit blog post"""
+        try:
+            blog = Blog.get(slug = slug)
+        except Blog.DoesNotExist:
+            abort(404, message='Blog not found')
+        for field in args:
+            setattr(blog, field, args[field])
+        blog.save()
+        return blog
