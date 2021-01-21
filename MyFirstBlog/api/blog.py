@@ -1,5 +1,6 @@
 from freenit.api.methodviews import MethodView
 from freenit.schemas.paging import PageInSchema, paginate
+from freenit.decorators import one,every
 from flask_smorest import Blueprint, abort
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
@@ -9,12 +10,14 @@ from ..models.user import User
 
 blueprint = Blueprint('blogs', 'blogs')
 
+GetDetailsRoles = ['GetDetails','BlogCreate']
 
 @blueprint.route('', endpoint='blog')
 class BlogListAPI(MethodView):
     @jwt_required
     @blueprint.response(BlogSchema)
     @blueprint.arguments(BlogSchema)
+    @one(GetDetailsRoles)
     def post(self, args):
         """Create blog post"""
         blog = Blog(**args)
@@ -60,6 +63,7 @@ class BlogApi(MethodView):
     @jwt_required
     @blueprint.arguments(BlogSchema(partial=True))
     @blueprint.response(BlogSchema)
+    @every(GetDetailsRoles)
     def patch(self, args, slug):
         """Edit blog post"""
         try:
